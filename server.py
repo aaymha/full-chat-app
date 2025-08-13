@@ -1,96 +1,68 @@
-import asyncio
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
-import threading
-import http.server
-import socketserver
-from os import write
-import websockets
-from websockets.asyncio.server import serve
+import uvicorn
+
+app = FastAPI()
+
+@app.get("/")
+async def read_index():
+    return FileResponse('chat.html')
+
+
+@app.get("/{filename}")
+async def read_file(filename: str):
+    if filename in ["script.js", "style.css"]:
+        return FileResponse(filename)
+    return {"error": "File not found"}
+
 
 connected_users = {}
 user_names = {}
 
-
-async def client_one(websocket):
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
     user_id = id(websocket)
+
     try:
-        nickname = await websocket.recv()
-        nick = nickname
-        await user_connected(user_id, nick.strip(), websocket)
-        await username(nick, user_id)
-        name = user_names[user_id]
+        nickname = await websocket.receive_text()
+        nick = nickname.strip()
+
+        connected_users[user_id] = websocket
+        user_names[user_id] = nick
+
+        join_message = f"{nick} joined the chat, ID: {user_id}"
+        await websocket.send_text(join_message)
 
         while True:
-            data = await websocket.recv()
-            try:
-                if not data:
-                    await user_disconnected(user_id, nick.strip(), websocket)
-                    break
-            except(KeyboardInterrupt, ConnectionError, ConnectionAbortedError, ConnectionRefusedError,
-                   ConnectionResetError):
-                await user_disconnected(user_id, nick.strip(), websocket)
-                break
+            message = await websocket.receive_text()
+            print(f"{message}")
 
-            message = data
-            print(f"{message.strip()}")
-            await broadcast(message, websocket)
-    except websockets.exceptions.ConnectionClosed:
+            for ws in connected_users.values():
+                try:
+                    await ws.send_text(message)
+                except:
+                    pass
+
+    except WebSocketDisconnect:
         pass
     finally:
         if user_id in connected_users:
-            await user_disconnected(user_id, nick.strip(), websocket)
+            del connected_users[user_id]
+            if user_id in user_names:
+                nick = user_names[user_id]
+                del user_names[user_id]
 
-    await websocket.close()
-
-
-async def username(nickname, id_user):
-    user_names[id_user] = nickname
-    print(user_names)
-
-
-async def broadcast(namemess, sender):
-    for websocket in connected_users.values():
-        await websocket.send(namemess)
-
-
-async def user_connected(id_user, nickname, websocket):
-    await websocket.send(f"{nickname} joined the chat, ID: {id_user}")
-    connected_users[id_user] = websocket
-
-
-async def user_disconnected(id_user, nickname, websocket):
-    if id_user in connected_users:
-        del connected_users[id_user]
-        await broadcast(f"{nickname} left the chat", websocket)
-
-
-def start_http_server(port):
-
-    class CustomHandler(http.server.SimpleHTTPRequestHandler):
-        def end_headers(self):
-            self.send_header('Access-Control-Allow-Origin', '*')
-            super().end_headers()
-
-    with socketserver.TCPServer(("", port), CustomHandler) as httpd:
-        print(f"HTTP server serving at port {port}")
-        httpd.serve_forever()
-
-
-async def main():
-    port = int(os.environ.get("PORT", 8888))
-
-    print(f"Starting servers on port {port}")
-
-    http_thread = threading.Thread(
-        target=start_http_server,
-        args=(port,),
-        daemon=True
-    )
-    http_thread.start()
-
-    async with serve(client_one, '0.0.0.0', port, path="/ws") as server:
-        await server.serve_forever()
+                leave_message = f"{nick} left the chat"
+                for ws in list(connected_users.values()):
+                    try:
+                        await ws.send_text(leave_message)
+                    except:
+                        pass
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

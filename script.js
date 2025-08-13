@@ -1,4 +1,4 @@
-const connection = new WebSocket("ws://6.tcp.eu.ngrok.io:14263")
+const connection= new WebSocket(`wss://${window.location.host}/ws`);
 
 let nickname = prompt("Enter your name: ")
 setTimeout(() => {

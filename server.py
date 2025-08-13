@@ -1,9 +1,13 @@
 import asyncio
+import os
 from os import write
 import websockets
 from websockets.asyncio.server import serve
+
 connected_users = {}
 user_names = {}
+
+
 async def client_one(websocket):
     user_id = id(websocket)
     try:
@@ -19,7 +23,8 @@ async def client_one(websocket):
                 if not data:
                     await user_disconnected(user_id, nick.strip(), websocket)
                     break
-            except(KeyboardInterrupt, ConnectionError, ConnectionAbortedError, ConnectionRefusedError, ConnectionResetError):
+            except(KeyboardInterrupt, ConnectionError, ConnectionAbortedError, ConnectionRefusedError,
+                   ConnectionResetError):
                 await user_disconnected(user_id, nick.strip(), websocket)
                 break
 
@@ -32,8 +37,8 @@ async def client_one(websocket):
         if user_id in connected_users:
             await user_disconnected(user_id, nick.strip(), websocket)
 
-
     await websocket.close()
+
 
 async def username(nickname, id_user):
     user_names[id_user] = nickname
@@ -43,13 +48,11 @@ async def username(nickname, id_user):
 async def broadcast(namemess, sender):
     for websocket in connected_users.values():
         await websocket.send(namemess)
-        await websocket.drain()
 
 
 async def user_connected(id_user, nickname, websocket):
     await websocket.send(f"{nickname} joined the chat, ID: {id_user}")
     connected_users[id_user] = websocket
-    await websocket.drain()
 
 
 async def user_disconnected(id_user, nickname, websocket):
@@ -57,8 +60,15 @@ async def user_disconnected(id_user, nickname, websocket):
         del connected_users[id_user]
         await broadcast(f"{nickname} left the chat", websocket)
 
+
 async def main():
-    async with serve(client_one, '0.0.0.0', 8888) as server:
+    port = int(os.environ.get("PORT", 8888))
+
+    print(f"Starting WebSocket server on port {port}")
+
+    async with serve(client_one, '0.0.0.0', port) as server:
         await server.serve_forever()
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())

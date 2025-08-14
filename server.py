@@ -39,7 +39,7 @@ async def websocket_endpoint(websocket: WebSocket):
         connected_users[user_id] = websocket
         user_names[user_id] = nick
 
-        join_message = f"{nick} joined the chat! ID: {user_id}"
+        join_message = f"{nick} joined the cha! ID: {user_id}"
         await websocket.send_text(join_message)
         await recent_messages()
 

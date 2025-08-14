@@ -18,7 +18,7 @@ async def read_index():
 async def read_file(filename: str):
     if filename in ["script.js", "style.css"]:
         return FileResponse(filename)
-    return {"error": "File not foundss"}
+    return {"error": "File not founds"}
 
 
 # WebSocket connection

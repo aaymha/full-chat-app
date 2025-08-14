@@ -1,6 +1,6 @@
 const connection= new WebSocket(`wss://${window.location.host}/ws`);
 
-let nickname = prompt("Enter your name: ")
+//let nickname = prompt("Enter your name: ")
 setTimeout(() => {
   connection.send(nickname);
 }, 1000);

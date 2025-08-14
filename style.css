@@ -1,52 +1,59 @@
 body {
-  height: 100vh;
+  height: 90vh;
   margin: 0;
   overflow: hidden;
   font-family: Roboto, sans-serif;
   display: flex;
   flex-direction: column;
+  font-size: 18px;
+  background-color: #101828;
 }
 
 button {
   font-family: Roboto, sans-serif;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px; /* Slightly larger radius */
   background: #eee;
-  padding: 8px 16px;
+  padding: 12px 24px; /* Increased padding */
+  font-size: 16px; /* Larger text */
 }
 
 input {
   border: 1px solid #ddd;
-  border-radius: 16px;
-  padding: 8px 24px;
-  width: 150px;
+  border-radius: 20px; /* Larger radius */
+  padding: 12px 28px; /* Increased padding */
+  width: 10em; /* Wider input */
+  font-size: 2rem; /* Larger text */
 }
 
 #content {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  overflow: scroll;
+  justify-content: flex-end;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px; /* Increased gap */
+  border-color: white;
+  border-radius: 2px;
+  border-style: solid;
+  color: white;
+  font-size: 30px;
 }
 
 .header,
 .footer {
   display: flex;
-    align-items: flex-start;
-  justify-content: space-between;
-  padding: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 2em; /* Increased padding */
 }
 
-.footer {
-  background: #eee;
-}
 
 ul {
   display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 16px
+  gap: 24px; /* Increased gap */
 }

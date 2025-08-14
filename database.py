@@ -31,6 +31,7 @@ async def recent_messages():
     curs.execute("SELECT message from messages")
     return curs.fetchall()
 
+asyncio.run(init_database())
 
 
 

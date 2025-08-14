@@ -5,6 +5,19 @@ import os
 import uvicorn
 import sqlite3
 
+conn = sqlite3.connect('messages.db')
+cursor = conn.cursor()
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT,
+        message TEXT,
+        timestamp TIMESTAMP
+
+    )
+''')
+
 app = FastAPI()
 
 @app.get("/")
@@ -43,7 +56,11 @@ async def websocket_endpoint(websocket: WebSocket):
 
         while True:
             message = await websocket.receive_text()
-            print(f"{message}")
+            cursor.execute('INSERT INTO messages (id, username, message) VALUES (?, ?, ?)',
+                           (user_id, nick, message))
+            conn.commit()
+
+            print(f"{nick} + {message}")
 
             for ws in connected_users.values():
                 try:

@@ -1,22 +1,9 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 import os
 import uvicorn
 import sqlite3
-
-conn = sqlite3.connect('messages.db')
-cursor = conn.cursor()
-
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        username TEXT,
-        message TEXT,
-        timestamp TIMESTAMP
-
-    )
-''')
+from database import init_database, save_message
 
 app = FastAPI()
 
@@ -41,6 +28,7 @@ user_names = {}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    await init_database()
     await websocket.accept()
     user_id = id(websocket)
 
@@ -56,10 +44,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
         while True:
             message = await websocket.receive_text()
-            cursor.execute('INSERT INTO messages (id, username, message) VALUES (?, ?, ?)',
-                           (user_id, nick, message))
-            conn.commit()
-
+            await save_message(nick, message)
             print(f"{nick} + {message}")
 
             for ws in connected_users.values():

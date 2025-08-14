@@ -29,8 +29,8 @@ async def recent_messages():
     curs = conn.cursor()
 
     curs.execute("SELECT message from messages")
-    print(curs.fetchall())
-    conn.close()
+    return curs.fetchall()
+
 
 
 

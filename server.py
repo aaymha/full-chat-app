@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 import os
 import uvicorn
 import sqlite3
-from database import init_database, save_message
+from database import init_database, save_message, recent_messages
 
 app = FastAPI()
 
@@ -39,8 +39,9 @@ async def websocket_endpoint(websocket: WebSocket):
         connected_users[user_id] = websocket
         user_names[user_id] = nick
 
-        join_message = f"{nick} joined the chat, ID: {user_id}"
+        join_message = f"{nick} joined the chat! ID: {user_id}"
         await websocket.send_text(join_message)
+        await recent_messages()
 
         while True:
             message = await websocket.receive_text()

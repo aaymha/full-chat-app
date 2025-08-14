@@ -41,7 +41,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
         join_message = f"{nick} joined the cha! ID: {user_id}"
         await websocket.send_text(join_message)
-        await recent_messages()
+        message_string = '\n'.join(recent_messages())
+        await websocket.send_text(message_string)
+
 
         while True:
             message = await websocket.receive_text()

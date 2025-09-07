@@ -5,8 +5,8 @@
 3. Join/Leave notification
 
 Used tech:
-**1. Backend: Python, FastAPI, WebSockets**
-**2. Database: SQLite**
-**3. Frontend: HTML, JavaScript, CSS**
-**4. Deployment: Render**
-**5. Server: Uvicorn**
+1. **Backend: Python, FastAPI, WebSockets**
+2. **Database: SQLite**
+3. **Frontend: HTML, JavaScript, CSS**
+4. **Deployment: Render**
+5. **Server: Uvicorn**
